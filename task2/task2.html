@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harsha — Intermediate HTML, CSS &amp; JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16302c;
+    --paper:#eef4ee;
+    --card:#ffffff;
+    --teal:#0f3d3e;
+    --teal-2:#1c5c5a;
+    --coral:#ff6b4a;
+    --line: rgba(22,48,44,0.12);
+    --error:#c0392b;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 8% 6%, rgba(15,61,62,0.06), transparent 40%),
+      radial-gradient(circle at 94% 96%, rgba(255,107,74,0.08), transparent 45%);
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+  }
+
+  /* ---------- Nav (Flexbox) ---------- */
+  header.nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 40px;
+    border-bottom:1px solid var(--line);
+    background:rgba(238,244,238,0.85);
+    backdrop-filter:blur(6px);
+    position:sticky;
+    top:0;
+    z-index:10;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+  }
+
+  .brand .dot{
+    width:12px; height:12px; border-radius:50%;
+    background:var(--coral);
+  }
+
+  nav.links{
+    display:flex;
+    gap:26px;
+    list-style:none;
+    margin:0; padding:0;
+    font-size:14px;
+    font-weight:500;
+  }
+
+  nav.links a{
+    color:var(--ink);
+    text-decoration:none;
+    opacity:.75;
+    transition:opacity .2s ease, color .2s ease;
+    padding-bottom:2px;
+    border-bottom:1px solid transparent;
+  }
+  nav.links a:hover{ opacity:1; border-color:var(--coral); }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--coral);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:56px 40px 20px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-size:clamp(28px, 4vw, 40px);
+    font-weight:600;
+    margin:10px 0 8px;
+  }
+  .hero p{
+    max-width:560px;
+    color:rgba(22,48,44,.75);
+    line-height:1.6;
+    margin:0;
+  }
+
+  /* ---------- Layout Grid ---------- */
+  .layout{
+    max-width:1100px;
+    margin:36px auto 60px;
+    padding:0 40px 60px;
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:28px;
+  }
+
+  @media (max-width:820px){
+    .layout{ grid-template-columns:1fr; }
+    header.nav{ padding:16px 20px; }
+    .hero{ padding:40px 20px 10px; }
+    .layout{ padding:0 20px 40px; }
+  }
+
+  .panel{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:32px;
+    box-shadow:0 24px 50px -30px rgba(15,61,62,0.25);
+    opacity:0;
+    transform:translateY(16px);
+    animation:rise .6s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .panel.delay{ animation-delay:.12s; }
+
+  @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+
+  .panel h2{
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  .panel .sub{
+    font-size:13px;
+    color:rgba(22,48,44,.6);
+    margin:0 0 24px;
+  }
+
+  /* ---------- Contact Form ---------- */
+  .field{
+    margin-bottom:18px;
+  }
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    margin-bottom:6px;
+  }
+  .field input,
+  .field textarea{
+    width:100%;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    padding:11px 13px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:#fbfdfb;
+    color:var(--ink);
+    transition:border-color .2s ease, box-shadow .2s ease;
+    resize:vertical;
+  }
+  .field input:focus,
+  .field textarea:focus{
+    outline:none;
+    border-color:var(--teal-2);
+    box-shadow:0 0 0 3px rgba(15,61,62,0.12);
+  }
+  .field input.invalid,
+  .field textarea.invalid{
+    border-color:var(--error);
+    box-shadow:0 0 0 3px rgba(192,57,43,0.1);
+  }
+  .error-msg{
+    font-size:12px;
+    color:var(--error);
+    margin-top:5px;
+    min-height:14px;
+    opacity:0;
+    transform:translateY(-4px);
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .error-msg.show{ opacity:1; transform:translateY(0); }
+
+  button.submit{
+    width:100%;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    color:#fff;
+    background:var(--coral);
+    border:none;
+    padding:13px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:transform .2s ease, box-shadow .2s ease;
+    box-shadow:0 10px 24px -10px rgba(255,107,74,0.55);
+  }
+  button.submit:hover{ transform:translateY(-2px); box-shadow:0 14px 28px -10px rgba(255,107,74,0.7); }
+  button.submit:active{ transform:translateY(0); }
+
+  .form-status{
+    margin-top:14px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    color:var(--teal-2);
+    opacity:0;
+    transition:opacity .3s ease;
+  }
+  .form-status.show{ opacity:1; }
+
+  /* ---------- To-Do List ---------- */
+  .todo-input-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .todo-input-row input{
+    flex:1;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    padding:11px 13px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:#fbfdfb;
+    color:var(--ink);
+  }
+  .todo-input-row input:focus{
+    outline:none;
+    border-color:var(--teal-2);
+    box-shadow:0 0 0 3px rgba(15,61,62,0.12);
+  }
+  .todo-input-row button{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    color:#fff;
+    background:var(--teal);
+    border:none;
+    padding:0 20px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .todo-input-row button:hover{ background:var(--teal-2); transform:translateY(-1px); }
+
+  ul.todo-list{
+    list-style:none;
+    margin:0; padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  ul.todo-list li{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:11px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fbfdfb;
+    font-size:14px;
+    animation:itemIn .3s ease forwards;
+  }
+
+  @keyframes itemIn{
+    from{ opacity:0; transform:translateY(-6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  ul.todo-list li.done span.text{
+    text-decoration:line-through;
+    color:rgba(22,48,44,.4);
+  }
+
+  ul.todo-list li .text{
+    cursor:pointer;
+    flex:1;
+  }
+
+  ul.todo-list li button.remove{
+    border:none;
+    background:transparent;
+    color:var(--error);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    padding:4px 6px;
+    border-radius:6px;
+    transition:background .2s ease;
+  }
+  ul.todo-list li button.remove:hover{ background:rgba(192,57,43,0.1); }
+
+  .empty-note{
+    font-size:13px;
+    color:rgba(22,48,44,.45);
+    font-style:italic;
+    padding:6px 2px;
+  }
+
+  .todo-count{
+    margin-top:16px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:rgba(22,48,44,.55);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .panel, ul.todo-list li{ animation:none; opacity:1; transform:none; }
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="brand"><span class="dot"></span>Harsha</div>
+    <nav class="links">
+      <ul style="display:flex; gap:26px; list-style:none; margin:0; padding:0;">
+        <li><a href="#contact">Contact Form</a></li>
+        <li><a href="#todo">To-Do List</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow">Portfolio</p>
+    <h1>Forms, validation, DOM manipulation — and a layout that adapts.</h1>
+    <p>A responsive two-panel page: a validated contact form on the left, a dynamic to-do list on the right. Built with Flexbox for the nav, CSS Grid for the content, and vanilla JavaScript for validation and DOM updates.</p>
+  </section>
+
+  <div class="layout">
+
+    <section class="panel" id="contact">
+      <h2>Get in touch</h2>
+      <p class="sub">All fields required — email is checked for a valid format.</p>
+
+      <form id="contactForm" novalidate>
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Your name">
+          <div class="error-msg" id="nameError"></div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com">
+          <div class="error-msg" id="emailError"></div>
+        </div>
+
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="4" placeholder="What's on your mind?"></textarea>
+          <div class="error-msg" id="messageError"></div>
+        </div>
+
+        <button type="submit" class="submit">Send message</button>
+        <div class="form-status" id="formStatus"></div>
+      </form>
+    </section>
+
+    <section class="panel delay" id="todo">
+      <h2>To-do list</h2>
+      <p class="sub">Add tasks, click one to mark it done, remove with ×.</p>
+
+      <div class="todo-input-row">
+        <input type="text" id="todoInput" placeholder="Add a task…">
+        <button id="todoAddBtn">Add</button>
+      </div>
+
+      <ul class="todo-list" id="todoList"></ul>
+      <div class="todo-count" id="todoCount"></div>
+    </section>
+
+  </div>
+
+<script>
+  /* ---------- Contact form validation ---------- */
+  const form = document.getElementById('contactForm');
+  const status = document.getElementById('formStatus');
+
+  const fields = {
+    name: { el: document.getElementById('name'), err: document.getElementById('nameError') },
+    email: { el: document.getElementById('email'), err: document.getElementById('emailError') },
+    message: { el: document.getElementById('message'), err: document.getElementById('messageError') }
+  };
+
+  function setError(field, msg){
+    field.el.classList.add('invalid');
+    field.err.textContent = msg;
+    field.err.classList.add('show');
+  }
+  function clearError(field){
+    field.el.classList.remove('invalid');
+    field.err.textContent = '';
+    field.err.classList.remove('show');
+  }
+
+  function isValidEmail(value){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let valid = true;
+
+    if (fields.name.el.value.trim() === ''){
+      setError(fields.name, 'Please enter your name.');
+      valid = false;
+    } else clearError(fields.name);
+
+    if (fields.email.el.value.trim() === ''){
+      setError(fields.email, 'Please enter your email.');
+      valid = false;
+    } else if (!isValidEmail(fields.email.el.value.trim())){
+      setError(fields.email, 'Please enter a valid email address.');
+      valid = false;
+    } else clearError(fields.email);
+
+    if (fields.message.el.value.trim() === ''){
+      setError(fields.message, 'Please write a short message.');
+      valid = false;
+    } else clearError(fields.message);
+
+    if (valid){
+      status.textContent = '✓ Message validated — ready to send.';
+      status.classList.add('show');
+      form.reset();
+      Object.values(fields).forEach(clearError);
+    } else {
+      status.classList.remove('show');
+    }
+  });
+
+  Object.values(fields).forEach(f => {
+    f.el.addEventListener('input', () => clearError(f));
+  });
+
+  /* ---------- Dynamic to-do list (DOM manipulation) ---------- */
+  const todoInput = document.getElementById('todoInput');
+  const todoAddBtn = document.getElementById('todoAddBtn');
+  const todoList = document.getElementById('todoList');
+  const todoCount = document.getElementById('todoCount');
+
+  let tasks = [];
+
+  function renderTodos(){
+    todoList.innerHTML = '';
+
+    if (tasks.length === 0){
+      const note = document.createElement('li');
+      note.className = 'empty-note';
+      note.style.border = 'none';
+      note.style.background = 'transparent';
+      note.textContent = 'No tasks yet — add your first one above.';
+      todoList.appendChild(note);
+    } else {
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        if (task.done) li.classList.add('done');
+
+        const span = document.createElement('span');
+        span.className = 'text';
+        span.textContent = task.text;
+        span.addEventListener('click', () => {
+          tasks[index].done = !tasks[index].done;
+          renderTodos();
+        });
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.addEventListener('click', () => {
+          tasks.splice(index, 1);
+          renderTodos();
+        });
+
+        li.appendChild(span);
+        li.appendChild(removeBtn);
+        todoList.appendChild(li);
+      });
+    }
+
+    const doneCount = tasks.filter(t => t.done).length;
+    todoCount.textContent = tasks.length
+      ? `${doneCount} of ${tasks.length} done`
+      : '';
+  }
+
+  function addTask(){
+    const value = todoInput.value.trim();
+    if (value === '') return;
+    tasks.push({ text: value, done: false });
+    todoInput.value = '';
+    renderTodos();
+    todoInput.focus();
+  }
+
+  todoAddBtn.addEventListener('click', addTask);
+  todoInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  renderTodos();
+</script>
+
+</body>
+</html>
