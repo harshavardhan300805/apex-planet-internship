@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harsha — Task 4: Full Project Implementation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16302c; --paper:#eef4ee; --card:#ffffff;
+    --teal:#0f3d3e; --teal-2:#1c5c5a; --coral:#ff6b4a;
+    --line: rgba(22,48,44,0.12); --error:#c0392b;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; min-height:100vh; background:var(--paper);
+    background-image:
+      radial-gradient(circle at 8% 6%, rgba(15,61,62,0.06), transparent 40%),
+      radial-gradient(circle at 94% 96%, rgba(255,107,74,0.08), transparent 45%);
+    font-family:'Inter', sans-serif; color:var(--ink);
+  }
+
+  /* ---------- Nav ---------- */
+  header.nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 40px; border-bottom:1px solid var(--line);
+    background:rgba(238,244,238,0.9); backdrop-filter:blur(6px);
+    position:sticky; top:0; z-index:10; flex-wrap:wrap; gap:12px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:'Fraunces', serif; font-weight:600; font-size:19px; }
+  .brand .dot{ width:12px; height:12px; border-radius:50%; background:var(--coral); }
+  nav.links ul{ display:flex; gap:20px; list-style:none; margin:0; padding:0; font-size:14px; font-weight:500; flex-wrap:wrap; }
+  nav.links button{
+    font-family:'Inter', sans-serif; background:none; border:none; cursor:pointer;
+    color:var(--ink); opacity:.7; font-size:14px; font-weight:500; padding:4px 0;
+    border-bottom:1px solid transparent; transition:opacity .2s ease, border-color .2s ease;
+  }
+  nav.links button:hover{ opacity:1; border-color:var(--coral); }
+  nav.links button.active{ opacity:1; color:var(--teal); border-color:var(--teal); font-weight:600; }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--coral);
+  }
+
+  /* ---------- Page shell ---------- */
+  main{ max-width:1000px; margin:0 auto; padding:52px 40px 70px; }
+  @media (max-width:820px){
+    header.nav{ padding:16px 20px; }
+    main{ padding:36px 20px 50px; }
+  }
+
+  .view{ display:none; }
+  .view.active{
+    display:block;
+    opacity:0; transform:translateY(14px);
+    animation:rise .5s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+
+  h1.page-title{ font-family:'Fraunces', serif; font-size:clamp(26px,4vw,38px); font-weight:600; margin:10px 0 14px; }
+  p.lede{ max-width:600px; color:rgba(22,48,44,.75); line-height:1.65; font-size:15.5px; margin:0 0 34px; }
+
+  .panel{
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:32px; box-shadow:0 24px 50px -30px rgba(15,61,62,0.25); margin-bottom:24px;
+  }
+  .panel h2{ font-family:'Fraunces', serif; font-size:20px; font-weight:600; margin:0 0 10px; }
+
+  /* ---------- About ---------- */
+  .about-grid{ display:grid; grid-template-columns:120px 1fr; gap:28px; align-items:start; }
+  @media (max-width:600px){ .about-grid{ grid-template-columns:1fr; } }
+  .avatar-lg{
+    width:110px; height:110px; border-radius:50%;
+    background:linear-gradient(135deg, var(--teal), var(--teal-2)); color:#eef4ee;
+    font-family:'Fraunces', serif; font-size:40px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; transition:transform .4s ease;
+  }
+  .avatar-lg:hover{ transform:rotate(-6deg) scale(1.04); }
+  .skills{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+  .skills span{
+    font-size:12.5px; font-weight:500; color:var(--teal); border:1px solid var(--line);
+    padding:6px 12px; border-radius:999px; transition:all .2s ease;
+  }
+  .skills span:hover{ background:var(--teal); color:#eef4ee; border-color:var(--teal); }
+
+  /* ---------- Projects ---------- */
+  .project-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:18px; }
+  @media (max-width:700px){ .project-grid{ grid-template-columns:1fr; } }
+  .project-card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:24px;
+    box-shadow:0 20px 40px -28px rgba(15,61,62,0.22);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .project-card:hover{ transform:translateY(-4px); box-shadow:0 26px 46px -26px rgba(15,61,62,0.3); }
+  .project-card .tag{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--coral); text-transform:uppercase; letter-spacing:.08em; }
+  .project-card h3{ font-family:'Fraunces', serif; font-size:17px; font-weight:600; margin:8px 0 8px; }
+  .project-card p{ font-size:13.5px; color:rgba(22,48,44,.7); line-height:1.55; margin:0 0 14px; }
+  .project-card button.goto{
+    font-size:13px; font-weight:600; color:var(--teal); background:none; border:none;
+    cursor:pointer; padding:0; border-bottom:1px solid var(--teal);
+  }
+  .project-card button.goto:hover{ color:var(--coral); border-color:var(--coral); }
+
+  /* ---------- Contact ---------- */
+  .field{ margin-bottom:18px; }
+  .field label{ display:block; font-size:13px; font-weight:500; margin-bottom:6px; }
+  .field input, .field textarea{
+    width:100%; font-family:'Inter', sans-serif; font-size:14px; padding:11px 13px;
+    border-radius:10px; border:1px solid var(--line); background:#fbfdfb; color:var(--ink);
+    transition:border-color .2s ease, box-shadow .2s ease; resize:vertical;
+  }
+  .field input:focus, .field textarea:focus{ outline:none; border-color:var(--teal-2); box-shadow:0 0 0 3px rgba(15,61,62,0.12); }
+  .field input.invalid, .field textarea.invalid{ border-color:var(--error); box-shadow:0 0 0 3px rgba(192,57,43,0.1); }
+  .error-msg{ font-size:12px; color:var(--error); margin-top:5px; min-height:14px; opacity:0; transform:translateY(-4px); transition:opacity .2s ease, transform .2s ease; }
+  .error-msg.show{ opacity:1; transform:translateY(0); }
+  button.submit{
+    width:100%; font-family:'Inter', sans-serif; font-size:14px; font-weight:600; color:#fff;
+    background:var(--coral); border:none; padding:13px 20px; border-radius:10px; cursor:pointer;
+    transition:transform .2s ease, box-shadow .2s ease; box-shadow:0 10px 24px -10px rgba(255,107,74,0.55);
+  }
+  button.submit:hover{ transform:translateY(-2px); box-shadow:0 14px 28px -10px rgba(255,107,74,0.7); }
+  .form-status{ margin-top:14px; font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--teal-2); opacity:0; transition:opacity .3s ease; }
+  .form-status.show{ opacity:1; }
+  .contact-info{ display:flex; gap:24px; flex-wrap:wrap; margin-top:6px; font-size:13.5px; color:rgba(22,48,44,.7); }
+  .contact-info span{ font-weight:600; color:var(--teal); }
+
+  /* ---------- Products ---------- */
+  .products-layout{ display:grid; grid-template-columns:220px 1fr; gap:24px; align-items:start; }
+  @media (max-width:760px){ .products-layout{ grid-template-columns:1fr; } }
+  .filters{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:22px; }
+  .filters h2{ font-family:'Fraunces', serif; font-size:16px; font-weight:600; margin:0 0 16px; }
+  .filter-group{ margin-bottom:20px; }
+  .filter-group label{ display:block; font-size:12.5px; font-weight:500; color:rgba(22,48,44,.65); margin-bottom:8px; text-transform:uppercase; letter-spacing:.04em; }
+  .cat-list{ display:flex; flex-direction:column; gap:6px; }
+  .cat-list button{
+    text-align:left; font-family:'Inter', sans-serif; font-size:13.5px; background:none; border:none;
+    padding:7px 10px; border-radius:8px; cursor:pointer; color:var(--ink); opacity:.75;
+    transition:background .2s ease, opacity .2s ease;
+  }
+  .cat-list button:hover{ background:#fbfdfb; opacity:1; }
+  .cat-list button.active{ background:var(--teal); color:#eef4ee; opacity:1; }
+  #priceRange{ width:100%; accent-color:var(--teal); }
+  .price-value{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--teal-2); margin-top:6px; }
+  select#sortSelect{
+    width:100%; font-family:'Inter', sans-serif; font-size:13.5px; padding:9px 10px;
+    border-radius:8px; border:1px solid var(--line); background:#fbfdfb; color:var(--ink); cursor:pointer;
+  }
+  .reset-btn{
+    width:100%; font-family:'Inter', sans-serif; font-size:12.5px; font-weight:600; color:var(--coral);
+    background:none; border:1px solid var(--line); padding:9px; border-radius:8px; cursor:pointer;
+    transition:background .2s ease;
+  }
+  .reset-btn:hover{ background:rgba(255,107,74,0.08); }
+  .results-bar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-size:13px; color:rgba(22,48,44,.6); }
+  .product-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; }
+  @media (max-width:900px){ .product-grid{ grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:560px){ .product-grid{ grid-template-columns:1fr; } }
+  .product-card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px;
+    box-shadow:0 20px 40px -28px rgba(15,61,62,0.2);
+    opacity:0; transform:translateY(10px); animation:cardIn .4s ease forwards;
+  }
+  @keyframes cardIn{ to{ opacity:1; transform:translateY(0); } }
+  .product-card img{ width:100%; height:120px; object-fit:contain; border-radius:12px; margin-bottom:12px; background:#e4e9e6; }
+  .product-card .cat{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--coral); text-transform:uppercase; letter-spacing:.06em; }
+  .product-card h3{ font-family:'Fraunces', serif; font-size:15.5px; font-weight:600; margin:6px 0 6px; }
+  .product-card .meta{ display:flex; justify-content:space-between; align-items:center; font-size:13.5px; }
+  .product-card .price{ font-weight:600; color:var(--teal); }
+  .product-card .rating{ font-size:12.5px; color:rgba(22,48,44,.6); }
+  .no-results{ grid-column:1/-1; text-align:center; padding:50px 20px; color:rgba(22,48,44,.5); font-size:14px; font-style:italic; }
+
+  /* ---------- To-Do ---------- */
+  .todo-card{ max-width:520px; }
+  .input-row{ display:flex; gap:8px; margin-bottom:18px; }
+  .input-row input{
+    flex:1; font-family:'Inter', sans-serif; font-size:14px; padding:11px 13px;
+    border-radius:10px; border:1px solid var(--line); background:#fbfdfb; color:var(--ink);
+  }
+  .input-row input:focus{ outline:none; border-color:var(--teal-2); box-shadow:0 0 0 3px rgba(15,61,62,0.12); }
+  .input-row button{
+    font-family:'Inter', sans-serif; font-weight:600; font-size:14px; color:#fff;
+    background:var(--teal); border:none; padding:0 20px; border-radius:10px; cursor:pointer;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .input-row button:hover{ background:var(--teal-2); transform:translateY(-1px); }
+  ul.todo-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  ul.todo-list li{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 14px;
+    border:1px solid var(--line); border-radius:10px; background:#fbfdfb; font-size:14px;
+    animation:itemIn .3s ease forwards;
+  }
+  @keyframes itemIn{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:translateY(0); } }
+  ul.todo-list li.done span.text{ text-decoration:line-through; color:rgba(22,48,44,.4); }
+  ul.todo-list li .text{ cursor:pointer; flex:1; }
+  ul.todo-list li button.remove{
+    border:none; background:transparent; color:var(--error); font-size:16px; line-height:1;
+    cursor:pointer; padding:4px 6px; border-radius:6px; transition:background .2s ease;
+  }
+  ul.todo-list li button.remove:hover{ background:rgba(192,57,43,0.1); }
+  .empty-note{ font-size:13px; color:rgba(22,48,44,.45); font-style:italic; padding:6px 2px; }
+  .footer-row{ display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
+  .todo-count{ font-family:'JetBrains Mono', monospace; font-size:12px; color:rgba(22,48,44,.55); }
+  .clear-done{
+    font-family:'Inter', sans-serif; font-size:12.5px; font-weight:500; color:var(--coral);
+    background:none; border:none; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:2px;
+  }
+  .save-note{ margin-top:14px; font-family:'JetBrains Mono', monospace; font-size:11.5px; color:rgba(22,48,44,.45); text-align:center; }
+
+
+  /* ---------- Extra mobile/cross-browser hardening ---------- */
+  img{ max-width:100%; }
+  button, input, select, textarea{ -webkit-appearance:none; appearance:none; }
+  button, a, input, select, textarea{ -webkit-tap-highlight-color:transparent; }
+
+  @media (max-width:480px){
+    header.nav{ padding:12px 16px; }
+    .hero{ padding:32px 16px 8px; }
+    .layout{ padding:0 16px 36px; }
+    .page-title, .hero h1{ font-size:clamp(25px, 8vw, 34px); line-height:1.12; }
+    .panel{ padding:22px 18px; }
+    .project-grid{ gap:14px; }
+    .products-layout{ gap:18px; }
+    .product-grid{ gap:14px; }
+    .cat-list{ display:flex; flex-wrap:wrap; gap:8px; }
+    .cat-list button{ min-height:40px; }
+    .field input, .field textarea, .submit{ font-size:16px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .view.active, .product-card, ul.todo-list li{ animation:none; opacity:1; transform:none; }
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="brand"><span class="dot"></span>Harsha</div>
+    <nav class="links">
+      <ul>
+        <li><button class="nav-btn active" data-view="about">About</button></li>
+        <li><button class="nav-btn" data-view="projects">Projects</button></li>
+        <li><button class="nav-btn" data-view="products">Products</button></li>
+        <li><button class="nav-btn" data-view="todo">To-Do</button></li>
+        <li><button class="nav-btn" data-view="contact">Contact</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ================= ABOUT ================= -->
+    <section class="view active" id="view-about">
+      <p class="eyebrow">Portfolio</p>
+      <h1 class="page-title">About me</h1>
+      <p class="lede">All of Task 4 — About, Projects, Products, To-Do, and Contact — combined into this single page, switching views with JavaScript instead of separate files.</p>
+
+      <section class="panel">
+        <div class="about-grid">
+          <div class="avatar-lg">H</div>
+          <div>
+            <h2>Hi, I'm Harsha</h2>
+            <p style="color:rgba(22,48,44,.75); line-height:1.65; font-size:14.5px; margin:0 0 4px;">
+              I work in sales and I'm learning web development from the ground up — this
+              9-day project has taken me from basic HTML pages through forms, DOM
+              manipulation, and now a small combined app with a working contact form,
+              a live product listing, and a persistent to-do list.
+            </p>
+            <p style="color:rgba(22,48,44,.75); line-height:1.65; font-size:14.5px;">
+              I like building things that are simple to use and don't waste anyone's time —
+              on the sales side and on the code side.
+            </p>
+            <div class="skills">
+              <span>HTML</span><span>CSS</span><span>JavaScript</span>
+              <span>Responsive Design</span><span>DOM Manipulation</span><span>Fetch API</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ================= PROJECTS ================= -->
+    <section class="view" id="view-projects">
+      <p class="eyebrow">Portfolio</p>
+      <h1 class="page-title">Projects</h1>
+      <p class="lede">A few things built while working through the basics-to-advanced web dev tasks.</p>
+
+      <div class="project-grid">
+        <article class="project-card">
+          <span class="tag">Task 1</span>
+          <h3>Basics of Web Development</h3>
+          <p>A minimal single page covering core HTML structure, CSS styling, and a first bit of JS interactivity.</p>
+          <a class="goto" href="task1.html" style="text-decoration:none; font-size:13px; font-weight:600; color:var(--teal); border-bottom:1px solid var(--teal);">View project →</a>
+        </article>
+        <article class="project-card">
+          <span class="tag">Task 2</span>
+          <h3>Contact Form &amp; To-Do List</h3>
+          <p>A validated contact form and a dynamic to-do list, laid out with Flexbox and CSS Grid.</p>
+          <a class="goto" href="task2.html" style="text-decoration:none; font-size:13px; font-weight:600; color:var(--teal); border-bottom:1px solid var(--teal);">View project →</a>
+        </article>
+        <article class="project-card">
+          <span class="tag">Task 3</span>
+          <h3>Quiz &amp; Live API</h3>
+          <p>A responsive breakpoint demo, an interactive multi-question quiz, and a live fetch from a public joke API.</p>
+          <a class="goto" href="task3.html" style="text-decoration:none; font-size:13px; font-weight:600; color:var(--teal); border-bottom:1px solid var(--teal);">View project →</a>
+        </article>
+        <article class="project-card">
+          <span class="tag">Task 4</span>
+          <h3>Product Listing (this page)</h3>
+          <p>Filter by category and price, sort by rating or price — prices shown in ₹, with real product photos.</p>
+          <button class="goto" data-view="products">Open Products tab →</button>
+        </article>
+        <article class="project-card">
+          <span class="tag">Task 4</span>
+          <h3>To-Do App (this page)</h3>
+          <p>Tasks persist across reloads using the browser's localStorage.</p>
+          <button class="goto" data-view="todo">Open To-Do tab →</button>
+        </article>
+        <article class="project-card">
+          <span class="tag">Task 4</span>
+          <h3>This whole app</h3>
+          <p>About, Projects, Products, To-Do, and Contact — five former pages, now one file, one nav.</p>
+          <button class="goto" data-view="about">Back to About →</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= PRODUCTS ================= -->
+    <section class="view" id="view-products">
+      <p class="eyebrow">Catalog</p>
+      <h1 class="page-title">Filter and sort the catalog</h1>
+      <p class="lede">Pick a category, set a max price in rupees, and choose a sort order — the grid updates instantly via JavaScript.</p>
+
+      <div class="products-layout">
+        <aside class="filters">
+          <h2>Filters</h2>
+          <div class="filter-group">
+            <label>Category</label>
+            <div class="cat-list" id="catList"></div>
+          </div>
+          <div class="filter-group">
+            <label>Max price: <span id="priceLabel">₹8,000</span></label>
+            <input type="range" id="priceRange" min="500" max="8000" step="250" value="8000">
+          </div>
+          <div class="filter-group">
+            <label>Sort by</label>
+            <select id="sortSelect">
+              <option value="default">Featured</option>
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
+              <option value="rating-desc">Rating: highest first</option>
+            </select>
+          </div>
+          <button class="reset-btn" id="resetBtn">Reset filters</button>
+        </aside>
+
+        <section>
+          <div class="results-bar"><span id="resultsCount"></span></div>
+          <div class="product-grid" id="productGrid"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ================= TO-DO ================= -->
+    <section class="view" id="view-todo">
+      <p class="eyebrow">Local storage</p>
+      <h1 class="page-title">To-do list</h1>
+      <p class="lede">Tasks are saved to this browser automatically — reload the page and they're still here.</p>
+
+      <div class="panel todo-card">
+        <div class="input-row">
+          <input type="text" id="todoInput" placeholder="Add a task…">
+          <button id="addBtn">Add</button>
+        </div>
+        <ul class="todo-list" id="todoList"></ul>
+        <div class="footer-row">
+          <div class="todo-count" id="todoCount"></div>
+          <button class="clear-done" id="clearDoneBtn">Clear completed</button>
+        </div>
+        <div class="save-note">Persisted with <code>window.localStorage</code></div>
+      </div>
+    </section>
+
+    <!-- ================= CONTACT ================= -->
+    <section class="view" id="view-contact">
+      <p class="eyebrow">Portfolio</p>
+      <h1 class="page-title">Get in touch</h1>
+      <p class="lede">Have a question or want to connect? Send a message below.</p>
+
+      <section class="panel">
+        <h2>Contact form</h2>
+        <form id="contactForm" novalidate>
+          <div class="field">
+            <label for="name">Name</label>
+            <input type="text" id="name" placeholder="Your name">
+            <div class="error-msg" id="nameError"></div>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="you@example.com">
+            <div class="error-msg" id="emailError"></div>
+          </div>
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" rows="4" placeholder="What's on your mind?"></textarea>
+            <div class="error-msg" id="messageError"></div>
+          </div>
+          <button type="submit" class="submit">Send message</button>
+          <div class="form-status" id="formStatus"></div>
+        </form>
+        <div class="contact-info">
+          <div><span>Email:</span> harsha@example.com</div>
+          <div><span>Based in:</span> Hyderabad, India</div>
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+<script>
+  /* ================= View switching (tab navigation) ================= */
+  const navButtons = document.querySelectorAll('.nav-btn');
+  const views = document.querySelectorAll('.view');
+
+  function showView(name){
+    views.forEach(v => v.classList.remove('active'));
+    navButtons.forEach(b => b.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll(`.nav-btn[data-view="${name}"]`).forEach(b => b.classList.add('active'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('[data-view]').forEach(el => {
+    el.addEventListener('click', () => showView(el.dataset.view));
+  });
+
+  /* ================= Contact form validation ================= */
+  const form = document.getElementById('contactForm');
+  const status = document.getElementById('formStatus');
+  const fields = {
+    name: { el: document.getElementById('name'), err: document.getElementById('nameError') },
+    email: { el: document.getElementById('email'), err: document.getElementById('emailError') },
+    message: { el: document.getElementById('message'), err: document.getElementById('messageError') }
+  };
+  function setError(f, msg){ f.el.classList.add('invalid'); f.err.textContent = msg; f.err.classList.add('show'); }
+  function clearError(f){ f.el.classList.remove('invalid'); f.err.textContent = ''; f.err.classList.remove('show'); }
+  function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let valid = true;
+    if (fields.name.el.value.trim() === ''){ setError(fields.name, 'Please enter your name.'); valid = false; }
+    else clearError(fields.name);
+    if (fields.email.el.value.trim() === ''){ setError(fields.email, 'Please enter your email.'); valid = false; }
+    else if (!isValidEmail(fields.email.el.value.trim())){ setError(fields.email, 'Please enter a valid email address.'); valid = false; }
+    else clearError(fields.email);
+    if (fields.message.el.value.trim() === ''){ setError(fields.message, 'Please write a short message.'); valid = false; }
+    else clearError(fields.message);
+
+    if (valid){
+      status.textContent = '✓ Message validated — ready to send.';
+      status.classList.add('show');
+      form.reset();
+      Object.values(fields).forEach(clearError);
+    } else {
+      status.classList.remove('show');
+    }
+  });
+  Object.values(fields).forEach(f => f.el.addEventListener('input', () => clearError(f)));
+
+  /* ================= Product listing (INR, real photos) ================= */
+  const products = [
+    { name:'Trail Runner Backpack', category:'Outdoor', price:5299, rating:4.6, image:'assets/trail-runner-backpack.png' },
+    { name:'Portable Bluetooth Speaker', category:'Tech', price:4299, rating:4.4, image:'assets/portable-bluetooth-speaker.png' },
+    { name:'Noise-Cancelling Earbuds', category:'Tech', price:7899, rating:4.2, image:'assets/noise-cancelling-earbuds.png' },
+    { name:'Canvas Tote Bag', category:'Apparel', price:1299, rating:4.1, image:'assets/canvas-tote-bag.png' },
+    { name:'Enamel Camp Mug', category:'Outdoor', price:1149, rating:4.7, image:'assets/enamel-camp-mug.png' },
+    { name:'Mechanical Desk Lamp', category:'Home', price:4799, rating:4.0, image:'assets/mechanical-desk-lamp.png' },
+    { name:'Ceramic Pour-Over Set', category:'Kitchen', price:3199, rating:4.8, image:'assets/ceramic-pour-over-set.png' },
+    { name:'Wireless Keyboard', category:'Tech', price:6599, rating:4.3, image:'assets/wireless-keyboard.png' },
+    { name:'Merino Wool Beanie', category:'Apparel', price:1799, rating:4.5, image:'assets/merino-wool-beanie.png' },
+    { name:'Cast Iron Skillet', category:'Kitchen', price:3799, rating:4.9, image:'assets/cast-iron-skillet.png' },
+    { name:'Desk Plant — Pothos', category:'Home', price:1499, rating:4.4, image:'assets/desk-plant-pothos.png' },
+    { name:'Scented Soy Candle', category:'Home', price:1999, rating:4.6, image:'assets/scented-soy-candle.png' }
+  ];
+
+  /* Supplied product photos are mapped by product name so the card image always matches the title. */
+  const productImages = {
+    'Trail Runner Backpack': 'assets/trail-runner-backpack.png',
+    'Portable Bluetooth Speaker': 'assets/portable-bluetooth-speaker.png',
+    'Noise-Cancelling Earbuds': 'assets/noise-cancelling-earbuds.png',
+    'Canvas Tote Bag': 'assets/canvas-tote-bag.png',
+    'Enamel Camp Mug': 'assets/enamel-camp-mug.png',
+    'Mechanical Desk Lamp': 'assets/mechanical-desk-lamp.png',
+    'Ceramic Pour-Over Set': 'assets/ceramic-pour-over-set.png',
+    'Wireless Keyboard': 'assets/wireless-keyboard.png',
+    'Merino Wool Beanie': 'assets/merino-wool-beanie.png',
+    'Cast Iron Skillet': 'assets/cast-iron-skillet.png',
+    'Desk Plant — Pothos': 'assets/desk-plant-pothos.png',
+    'Scented Soy Candle': 'assets/scented-soy-candle.png'
+  };
+
+  function productImage(name){
+    return productImages[name];
+  }
+
+  const categories = ['All', ...new Set(products.map(p => p.category))];
+  let activeCategory = 'All';
+  let maxPrice = 8000;
+  let sortMode = 'default';
+
+  const catList = document.getElementById('catList');
+  const priceRange = document.getElementById('priceRange');
+  const priceLabel = document.getElementById('priceLabel');
+  const sortSelect = document.getElementById('sortSelect');
+  const resetBtn = document.getElementById('resetBtn');
+  const grid = document.getElementById('productGrid');
+  const resultsCount = document.getElementById('resultsCount');
+
+  function formatINR(n){ return '₹' + n.toLocaleString('en-IN'); }
+
+  function renderCategoryButtons(){
+    catList.innerHTML = '';
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.textContent = cat;
+      if (cat === activeCategory) btn.classList.add('active');
+      btn.addEventListener('click', () => { activeCategory = cat; renderCategoryButtons(); renderProducts(); });
+      catList.appendChild(btn);
+    });
+  }
+
+  function renderProducts(){
+    let list = products.filter(p => (activeCategory === 'All' || p.category === activeCategory) && p.price <= maxPrice);
+    if (sortMode === 'price-asc') list.sort((a,b) => a.price - b.price);
+    if (sortMode === 'price-desc') list.sort((a,b) => b.price - a.price);
+    if (sortMode === 'rating-desc') list.sort((a,b) => b.rating - a.rating);
+
+    grid.innerHTML = '';
+    resultsCount.textContent = `${list.length} product${list.length === 1 ? '' : 's'}`;
+
+    if (list.length === 0){
+      grid.innerHTML = '<div class="no-results">No products match these filters — try widening your price range.</div>';
+      return;
+    }
+
+    list.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.style.animationDelay = `${i * 0.03}s`;
+      card.innerHTML = `
+        <img src="${productImage(p.name)}" alt="${p.name}" loading="lazy" width="300" height="120">
+        <div class="cat">${p.category}</div>
+        <h3>${p.name}</h3>
+        <div class="meta">
+          <span class="price">${formatINR(p.price)}</span>
+          <span class="rating">★ ${p.rating.toFixed(1)}</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  priceRange.addEventListener('input', () => {
+    maxPrice = Number(priceRange.value);
+    priceLabel.textContent = formatINR(maxPrice);
+    renderProducts();
+  });
+  sortSelect.addEventListener('change', () => { sortMode = sortSelect.value; renderProducts(); });
+  resetBtn.addEventListener('click', () => {
+    activeCategory = 'All'; maxPrice = 8000; sortMode = 'default';
+    priceRange.value = 8000; priceLabel.textContent = formatINR(8000); sortSelect.value = 'default';
+    renderCategoryButtons(); renderProducts();
+  });
+
+  renderCategoryButtons();
+  renderProducts();
+
+  /* ================= To-do list (localStorage) ================= */
+  const STORAGE_KEY = 'harsha-todo-tasks';
+  const todoInput = document.getElementById('todoInput');
+  const addBtn = document.getElementById('addBtn');
+  const todoList = document.getElementById('todoList');
+  const todoCount = document.getElementById('todoCount');
+  const clearDoneBtn = document.getElementById('clearDoneBtn');
+
+  function loadTasks(){
+    try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
+    catch(e){ return []; }
+  }
+  function saveTasks(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+
+  let tasks = loadTasks();
+
+  function renderTodos(){
+    todoList.innerHTML = '';
+    if (tasks.length === 0){
+      const note = document.createElement('li');
+      note.className = 'empty-note';
+      note.style.border = 'none'; note.style.background = 'transparent';
+      note.textContent = 'No tasks yet — add one above.';
+      todoList.appendChild(note);
+    } else {
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        if (task.done) li.classList.add('done');
+        const span = document.createElement('span');
+        span.className = 'text';
+        span.textContent = task.text;
+        span.addEventListener('click', () => { tasks[index].done = !tasks[index].done; saveTasks(); renderTodos(); });
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.addEventListener('click', () => { tasks.splice(index, 1); saveTasks(); renderTodos(); });
+        li.appendChild(span); li.appendChild(removeBtn);
+        todoList.appendChild(li);
+      });
+    }
+    const doneCount = tasks.filter(t => t.done).length;
+    todoCount.textContent = tasks.length ? `${doneCount} of ${tasks.length} done` : '';
+  }
+
+  function addTask(){
+    const value = todoInput.value.trim();
+    if (value === '') return;
+    tasks.push({ text: value, done: false });
+    saveTasks(); todoInput.value = ''; renderTodos(); todoInput.focus();
+  }
+
+  addBtn.addEventListener('click', addTask);
+  todoInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addTask(); });
+  clearDoneBtn.addEventListener('click', () => { tasks = tasks.filter(t => !t.done); saveTasks(); renderTodos(); });
+
+  renderTodos();
+</script>
+
+</body>
+</html>
